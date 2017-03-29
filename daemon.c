@@ -10,6 +10,7 @@
 #include <string.h>
 #include <signal.h>
 
+#define BUFF_SIZE 65
 #define SYSLOG_IDEN "PinMonitor"
 #define PID_FILE ""
 
@@ -116,30 +117,31 @@ int main(int argc, char *argv[])
 
 int setup_gpio(uint8_t pin, uint8_t mode)
 {
-    FILE *fp;
-    char buff[65];
+    int fd;
+    char buff[BUFF_SIZE];
+    ssize_t bytes_written;
     
     //TODO check if its already exported
     
-    fp = fopen("/sys/class/gpio/export", "w");
+    fd = open("/sys/class/gpio/export", O_WRONLY);
     if(fp == NULL){
         // Log the error here
         exit(EXIT_FAILURE);
     }
     
-    sprintf(buff, "%d", pin);
+    bytes_written = snprintf(buff, BUFF_SIZE, "%d", pin);
     
-    if(fputs(buff, fp) != 1){
+    if(write(fd, buff, bytes_written) < bytes_written){
         // Log the error here
         exit(EXIT_FAILURE);
     }
     
-    fclose(fp);
+    close(fp);
     
     //Setting mode
     sprintf(buff, "/sys/class/gpio/gpio%d/direction", pin);
     
-    fp = fopen(buff, "w");
+    fd = open(buff, O_WRONLY);
     
     if(fp == NULL){
         // Log the error here
@@ -147,15 +149,15 @@ int setup_gpio(uint8_t pin, uint8_t mode)
     }
     
     if(mode == GPIO_OUT){
-        sprintf(buff, "out");
+        bytes_written = snprintf(buff, BUFF_SIZE, "out");
     }else{
-        sprintf(buff, "in");
+        bytes_written = snprintf(buff, BUFF_SIZE, "in");
     }
     
-    if(fputs(buff, fp) < 0){
+    if(write(fd, buff, bytes_written) < bytes_written){
         // Log the error here
         exit(EXIT_FAILURE);
     }
     
-    fclose(fp);
+    close(fp);
 }
