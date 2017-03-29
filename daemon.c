@@ -32,7 +32,7 @@ static uint8_t daemon_running = 1;
 int setup_gpio(uint8_t pin, uint8_t mode);
 int gpio_write();
 int gpio_read();
-int cleanup_gpio();
+int cleanup_gpio(uint8_t pin);
 
 // Data Logging
 int opendata();
@@ -173,8 +173,6 @@ int cleanup_gpio(uint8_t pin)
     int fd;
     char buff[BUFF_SIZE];
     ssize_t bytes_written;
-    
-    //TODO check if its already exported
     
     fd = open("/sys/class/gpio/unexport", O_WRONLY);
     if(fd < 0){
