@@ -25,12 +25,7 @@ typedef struct{
 
 static volatile sig_atomic_t doneflag = 0;
 static gpio_t *exported;
-
-
-static void catchsignal(int sig, siginfo_t *siginfo, void *context)
-{
-    doneflag = 1;
-}
+static uint8_t daemon_running = 1;
 
 // Function prototypes
 // GPIO
@@ -43,6 +38,12 @@ int cleanup_gpio();
 int opendata();
 int writedata();
 int closedata();
+
+static void catchsignal(int sig, siginfo_t *siginfo, void *context)
+{
+    daemon_running = 0;
+    doneflag = 1;
+}
 
 int main(int argc, char *argv[])
 {
@@ -105,11 +106,14 @@ int main(int argc, char *argv[])
         setup_gpio(18, GPIO_IN);
         
         /* Daemon Loop */
-        while (1) {
+        while (daemon_running) {
            /* Do some task here ... */
            
            usleep(3000); /* wait 3 mseconds */
         }
+        
+        //Cleanup
+        cleanup_gpio(18);
 
 
     return 0;
@@ -160,4 +164,32 @@ int setup_gpio(uint8_t pin, uint8_t mode)
     }
     
     close(fd);
+    
+    return 0;
+}
+
+int cleanup_gpio(uint8_t pin)
+{
+    int fd;
+    char buff[BUFF_SIZE];
+    ssize_t bytes_written;
+    
+    //TODO check if its already exported
+    
+    fd = open("/sys/class/gpio/unexport", O_WRONLY);
+    if(fd < 0){
+        // Log the error here
+        exit(EXIT_FAILURE);
+    }
+    
+    bytes_written = snprintf(buff, BUFF_SIZE, "%d", pin);
+    
+    if(write(fd, buff, bytes_written) < bytes_written){
+        // Log the error here
+        exit(EXIT_FAILURE);
+    }
+    
+    close(fd);
+    
+    return 0;
 }
