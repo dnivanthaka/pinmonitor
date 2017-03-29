@@ -30,8 +30,8 @@ static uint8_t daemon_running = 1;
 // Function prototypes
 // GPIO
 int setup_gpio(uint8_t pin, uint8_t mode);
-int gpio_write();
-int gpio_read();
+int gpio_write(uint8_t pin, uint8_t value);
+int gpio_read(uint8_t pin);
 int cleanup_gpio(uint8_t pin);
 
 // Data Logging
@@ -41,7 +41,7 @@ int closedata();
 
 static void catchsignal(int sig, siginfo_t *siginfo, void *context)
 {
-    daemon_running = 0;
+    //daemon_running = 0;
     doneflag = 1;
 }
 
@@ -106,7 +106,7 @@ int main(int argc, char *argv[])
         setup_gpio(18, GPIO_IN);
         
         /* Daemon Loop */
-        while (daemon_running) {
+        while (1) {
            /* Do some task here ... */
            
            usleep(3000); /* wait 3 mseconds */
@@ -190,4 +190,58 @@ int cleanup_gpio(uint8_t pin)
     close(fd);
     
     return 0;
+}
+
+int gpio_read(uint8_t pin)
+{
+    int fd;
+    char buff[BUFF_SIZE];
+    char value_str[3];
+
+    snprintf(buff, BUFF_SIZE, "/sys/class/gpio/gpio%d/value", pin);
+    
+	fd = open(buff, O_RDONLY);
+	if (fd < 0) {
+		// Log the error here
+        exit(EXIT_FAILURE);
+	}
+ 
+	if (read(fd, value_str, 3) < 0) {
+		// Log the error here
+        exit(EXIT_FAILURE);
+	}
+ 
+	close(fd);
+ 
+	return(atoi(value_str));
+}
+
+int gpio_write(uint8_t pin, uint8_t value)
+{
+    int fd;
+    char buff[BUFF_SIZE];
+    char value_str[3];
+
+    snprintf(buff, BUFF_SIZE, "/sys/class/gpio/gpio%d/value", pin);
+    
+	fd = open(buff, O_WRONLY);
+	if (fd < 0) {
+		// Log the error here
+        exit(EXIT_FAILURE);
+	}
+	
+	if(value == 1){
+        snprintf(buff, 1, "1");
+    }else{
+        snprintf(buff, 1, "0");
+    }
+ 
+	if (write(fd, buff, 1) < 0) {
+		// Log the error here
+        exit(EXIT_FAILURE);
+	}
+ 
+	close(fd);
+ 
+	return 0;
 }
