@@ -124,7 +124,7 @@ int setup_gpio(uint8_t pin, uint8_t mode)
     //TODO check if its already exported
     
     fd = open("/sys/class/gpio/export", O_WRONLY);
-    if(fp < 0){
+    if(fd < 0){
         // Log the error here
         exit(EXIT_FAILURE);
     }
@@ -136,14 +136,14 @@ int setup_gpio(uint8_t pin, uint8_t mode)
         exit(EXIT_FAILURE);
     }
     
-    close(fp);
+    close(fd);
     
     //Setting mode
     sprintf(buff, "/sys/class/gpio/gpio%d/direction", pin);
     
     fd = open(buff, O_WRONLY);
     
-    if(fp < 0){
+    if(fd < 0){
         // Log the error here
         exit(EXIT_FAILURE);
     }
@@ -159,5 +159,5 @@ int setup_gpio(uint8_t pin, uint8_t mode)
         exit(EXIT_FAILURE);
     }
     
-    close(fp);
+    close(fd);
 }
