@@ -40,9 +40,9 @@ int gpio_read();
 int cleanup_gpio();
 
 // Data Logging
-int openlog();
-int writelog();
-int closelog();
+int opendata();
+int writedata();
+int closedata();
 
 int main(int argc, char *argv[])
 {
@@ -124,7 +124,7 @@ int setup_gpio(uint8_t pin, uint8_t mode)
     //TODO check if its already exported
     
     fd = open("/sys/class/gpio/export", O_WRONLY);
-    if(fp == NULL){
+    if(fp < 0){
         // Log the error here
         exit(EXIT_FAILURE);
     }
@@ -143,7 +143,7 @@ int setup_gpio(uint8_t pin, uint8_t mode)
     
     fd = open(buff, O_WRONLY);
     
-    if(fp == NULL){
+    if(fp < 0){
         // Log the error here
         exit(EXIT_FAILURE);
     }
