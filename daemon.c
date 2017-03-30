@@ -95,14 +95,16 @@ int main(int argc, char *argv[])
         close(STDERR_FILENO);
         
         memset (&act, 0, sizeof(act));
-        act.sa_sigaction = &catchsignal;/* set up signal handler */
+        act.sa_sigaction = catchsignal;/* set up signal handler */
         act.sa_flags = SA_SIGINFO;
         
-        if ((sigemptyset(&act.sa_mask) == -1) ||
+        sigaction(SIGTERM, &act, NULL);
+        
+        /*if ((sigemptyset(&act.sa_mask) == -1) ||
             (sigaction(SIGTERM, &act, NULL) == -1)) {
             syslog(LOG_ERR, "Cannot set signal handler");
             exit(EXIT_FAILURE);
-        }
+        }*/
         
         closelog();
         
@@ -120,7 +122,7 @@ int main(int argc, char *argv[])
         char buff[65];
         
         /* Daemon Loop */
-        while (1) {
+        while (doneflag) {
            /* Do some task here ... */
            //{"datetime":"", "states":[{"18":"LOW"}]}
            curr_val = gpio_read(18);
