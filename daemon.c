@@ -35,9 +35,9 @@ int gpio_read(uint8_t pin);
 int cleanup_gpio(uint8_t pin);
 
 // Data Logging
-int opendata(FILE *fp);
-int writedata(FILE *fp, char *data);
-int closedata(FILE *fp);
+int opendata(int fp);
+int writedata(int fp, char *data);
+int closedata(int fp);
 
 static void catchsignal(int sig, siginfo_t *siginfo, void *context)
 {
@@ -46,6 +46,8 @@ static void catchsignal(int sig, siginfo_t *siginfo, void *context)
 
 int main(int argc, char *argv[])
 {
+        int data_fd;
+        
         // Signal handling
         struct sigaction act;
 
@@ -104,37 +106,59 @@ int main(int argc, char *argv[])
         /* Daemon-specific initialization goes here */
         setup_gpio(18, GPIO_IN);
         
-        FILE *fp = fopen("/tmp/pinmon.txt", "w");
+        data_fd = open("/tmp/pinmon.txt", O_WRONLY);
         
-        opendata(fp);
+        opendata(data_fd);
+        
+        int prev_val = gpio_read(18);
+        int curr_val = gpio_read(18);
         
         /* Daemon Loop */
         while (doneflag) {
            /* Do some task here ... */
+           //{"datetime":"", "states":[{"18":"LOW"}]}
+           curr_val = gpio_read(18);
+           
+           if(curr_val != prev_val){
+                if(curr_val == 0){
+                    writedata(data_fd, "{\"datetime\":"", \"states\":[{\"18\":\"LO\"}]}");
+                }else{
+                    writedata(data_fd, "{\"datetime\":"", \"states\":[{\"18\":\"HI\"}]}");
+                }
+                
+                prev_val = curr_val;
+           }
+           
            
            usleep(3000); /* wait 3 mseconds */
         }
         
         //Cleanup
         cleanup_gpio(18);
-        closedata(fp);
+        closedata(data_fd);
 
 
     return 0;
 }
 
 // Data Logging ------------------------------------------------------//
-int opendata(FILE *fp)
+int opendata(int fp)
 {
     char *start = "-- Staring data logging --";
-    fwrite(start, sizeof(char), strlen(start), fp);
+    write(fp, start, strlen(start));
 }
 
-int closedata(FILE *fp)
+int closedata(int fp)
 {
-    if(fp != NULL){
-        fflush(fp);
-        fclose(fp);
+    if(fp > 0){
+        close(fp);
+    }
+}
+
+int writedata(int fp, char *data)
+{
+    if(fp > 0){
+        write(fp, data, strlen(data));
     }
 }
 // GPIO Operations ---------------------------------------------------//
