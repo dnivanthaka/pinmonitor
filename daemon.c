@@ -144,8 +144,8 @@ int main(int argc, char *argv[])
            }
            
            
-           //usleep(3000); /* wait 3 mseconds */
-           sleep(1); /* wait 3 mseconds */
+           usleep(3000); /* wait 3 mseconds */
+           //sleep(1); /* wait 3 mseconds */
         }
         
         //Cleanup
