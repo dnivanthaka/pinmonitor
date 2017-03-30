@@ -116,7 +116,7 @@ int main(int argc, char *argv[])
         int prev_val = gpio_read(18);
         int curr_val = gpio_read(18);
         
-        char test = 'x';
+        char *test = "TEST";
         
         /* Daemon Loop */
         while (doneflag) {
@@ -124,7 +124,7 @@ int main(int argc, char *argv[])
            //{"datetime":"", "states":[{"18":"LOW"}]}
            curr_val = gpio_read(18);
            
-           writedata(data_fd, &test);
+           writedata(data_fd, test);
            
            if(curr_val != prev_val){
                 if(curr_val == 0){
