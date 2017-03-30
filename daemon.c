@@ -119,6 +119,8 @@ int main(int argc, char *argv[])
            //{"datetime":"", "states":[{"18":"LOW"}]}
            curr_val = gpio_read(18);
            
+           writedata(data_fd, "X");
+           
            if(curr_val != prev_val){
                 if(curr_val == 0){
                     writedata(data_fd, "{\"datetime\":"", \"states\":[{\"18\":\"LO\"}]}");
@@ -130,7 +132,8 @@ int main(int argc, char *argv[])
            }
            
            
-           usleep(3000); /* wait 3 mseconds */
+           //usleep(3000); /* wait 3 mseconds */
+           sleep(1); /* wait 3 mseconds */
         }
         
         //Cleanup
@@ -144,7 +147,7 @@ int main(int argc, char *argv[])
 // Data Logging ------------------------------------------------------//
 int opendata(int fp)
 {
-    char *start = "-- Staring data logging --";
+    char *start = "-- Staring data logging --\n";
     write(fp, start, strlen(start));
 }
 
