@@ -106,7 +106,7 @@ int main(int argc, char *argv[])
         /* Daemon-specific initialization goes here */
         setup_gpio(18, GPIO_IN);
         
-        data_fd = open("/tmp/pinmon.txt", O_WRONLY);
+        data_fd = open("/tmp/pinmon.txt", O_WRONLY | O_CREAT);
         
         opendata(data_fd);
         
