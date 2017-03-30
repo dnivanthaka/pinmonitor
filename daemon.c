@@ -165,9 +165,9 @@ int closedata(int fp)
 
 int writedata(int fp, char *data)
 {
-    if(fp > 0){
+    //if(fp > 0){
         write(fp, data, strlen(data));
-    }
+    //}
 }
 // GPIO Operations ---------------------------------------------------//
 int setup_gpio(uint8_t pin, uint8_t mode)
