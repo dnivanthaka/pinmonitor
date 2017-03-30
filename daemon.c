@@ -41,7 +41,9 @@ int closedata(int fp);
 
 static void catchsignal(int sig, siginfo_t *siginfo, void *context)
 {
-    doneflag = 0;
+    if ((signo == SIGINT) || (signo == SIGQUIT) || (signo == SIGABRT) || (signo == SIGTERM)) {
+        doneflag = 0;
+    }
 }
 
 int main(int argc, char *argv[])
