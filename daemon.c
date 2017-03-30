@@ -9,6 +9,7 @@
 #include <syslog.h>
 #include <string.h>
 #include <signal.h>
+#include <string.h>
 
 #define BUFF_SIZE 65
 #define SYSLOG_IDEN "PinMonitor"
@@ -23,9 +24,8 @@ typedef struct{
     uint8_t val;
 } gpio_t;
 
-static volatile sig_atomic_t doneflag = 0;
+static volatile sig_atomic_t doneflag = 1;
 static gpio_t *exported;
-static uint8_t daemon_running = 1;
 
 // Function prototypes
 // GPIO
@@ -35,14 +35,13 @@ int gpio_read(uint8_t pin);
 int cleanup_gpio(uint8_t pin);
 
 // Data Logging
-int opendata();
-int writedata();
-int closedata();
+int opendata(FILE *fp);
+int writedata(FILE *fp, char *data);
+int closedata(FILE *fp);
 
 static void catchsignal(int sig, siginfo_t *siginfo, void *context)
 {
-    //daemon_running = 0;
-    doneflag = 1;
+    doneflag = 0;
 }
 
 int main(int argc, char *argv[])
@@ -90,12 +89,12 @@ int main(int argc, char *argv[])
         close(STDOUT_FILENO);
         close(STDERR_FILENO);
         
-        memset (&act, '\0', sizeof(act));
+        memset (&act, 0, sizeof(act));
         act.sa_sigaction = &catchsignal;/* set up signal handler */
         act.sa_flags = SA_SIGINFO;
         
         if ((sigemptyset(&act.sa_mask) == -1) ||
-            (sigaction(SIGINT, &act, NULL) == -1)) {
+            (sigaction(SIGTERM, &act, NULL) == -1)) {
             syslog(LOG_ERR, "Cannot set signal handler");
             exit(EXIT_FAILURE);
         }
@@ -105,8 +104,12 @@ int main(int argc, char *argv[])
         /* Daemon-specific initialization goes here */
         setup_gpio(18, GPIO_IN);
         
+        File *fp = fopen("/tmp/pinmon.txt", "w");
+        
+        opendata(fp);
+        
         /* Daemon Loop */
-        while (1) {
+        while (doneflag) {
            /* Do some task here ... */
            
            usleep(3000); /* wait 3 mseconds */
@@ -114,11 +117,27 @@ int main(int argc, char *argv[])
         
         //Cleanup
         cleanup_gpio(18);
+        closedata(fp);
 
 
     return 0;
 }
 
+// Data Logging ------------------------------------------------------//
+int opendata(FILE *fp)
+{
+    char *start = "-- Staring data logging --";
+    fwrite(start, sizeof(char), strlen(start), fp);
+}
+
+int closedata(FILE *fp)
+{
+    if(fp != NULL){
+        fflush(fp);
+        fclose(fp);
+    }
+}
+// GPIO Operations ---------------------------------------------------//
 int setup_gpio(uint8_t pin, uint8_t mode)
 {
     int fd;
@@ -135,7 +154,7 @@ int setup_gpio(uint8_t pin, uint8_t mode)
     
     bytes_written = snprintf(buff, BUFF_SIZE, "%d", pin);
     
-    if(write(fd, buff, bytes_written) < bytes_written){
+    if(write(fd, buff, bytes_written) < 0){
         // Log the error here
         exit(EXIT_FAILURE);
     }
@@ -158,7 +177,7 @@ int setup_gpio(uint8_t pin, uint8_t mode)
         bytes_written = snprintf(buff, BUFF_SIZE, "in");
     }
     
-    if(write(fd, buff, bytes_written) < bytes_written){
+    if(write(fd, buff, bytes_written) < 0){
         // Log the error here
         exit(EXIT_FAILURE);
     }
@@ -182,7 +201,7 @@ int cleanup_gpio(uint8_t pin)
     
     bytes_written = snprintf(buff, BUFF_SIZE, "%d", pin);
     
-    if(write(fd, buff, bytes_written) < bytes_written){
+    if(write(fd, buff, bytes_written) < 0){
         // Log the error here
         exit(EXIT_FAILURE);
     }
