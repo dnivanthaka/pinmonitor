@@ -116,7 +116,7 @@ int main(int argc, char *argv[])
         int prev_val = gpio_read(18);
         int curr_val = gpio_read(18);
         
-        char *test = "TEST";
+        char *test = "X";
         
         /* Daemon Loop */
         while (doneflag) {
@@ -128,9 +128,9 @@ int main(int argc, char *argv[])
            
            if(curr_val != prev_val){
                 if(curr_val == 0){
-                    //writedata(data_fd, "{\"datetime\":"", \"states\":[{\"18\":\"LO\"}]}");
+                    writedata(data_fd, "{\"datetime\":"", \"states\":[{\"18\":\"LO\"}]}");
                 }else{
-                    //writedata(data_fd, "{\"datetime\":"", \"states\":[{\"18\":\"HI\"}]}");
+                    writedata(data_fd, "{\"datetime\":"", \"states\":[{\"18\":\"HI\"}]}");
                 }
                 
                 prev_val = curr_val;
@@ -165,9 +165,9 @@ int closedata(int fp)
 
 int writedata(int fp, char *data)
 {
-    //if(fp > 0){
+    if(fp > 0){
         write(fp, data, strlen(data));
-    //}
+    }
 }
 // GPIO Operations ---------------------------------------------------//
 int setup_gpio(uint8_t pin, uint8_t mode)
