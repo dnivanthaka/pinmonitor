@@ -117,7 +117,7 @@ int main(int argc, char *argv[])
         int curr_val = gpio_read(18);
         
         char *test = "X";
-        char buff[65];
+        //char buff[65];
         
         /* Daemon Loop */
         while (1) {
@@ -129,14 +129,14 @@ int main(int argc, char *argv[])
            
            if(curr_val != prev_val){
                 if(curr_val == 0){
-                    snprintf(buff, BUFF_SIZE, "{\"datetime\":"", \"states\":[{\"18\":\"LO\"}]}");
+                    //snprintf(buff, BUFF_SIZE, "{\"datetime\":"", \"states\":[{\"18\":\"LO\"}]}");
                     //writedata(data_fd, "{\"datetime\":"", \"states\":[{\"18\":\"LO\"}]}");
                 }else{
-                    snprintf(buff, BUFF_SIZE, "{\"datetime\":"", \"states\":[{\"18\":\"HI\"}]}");
+                    //snprintf(buff, BUFF_SIZE, "{\"datetime\":"", \"states\":[{\"18\":\"HI\"}]}");
                     //writedata(data_fd, "{\"datetime\":"", \"states\":[{\"18\":\"HI\"}]}");
                 }
                 
-                writedata(data_fd, buff);
+                //writedata(data_fd, buff);
                 
                 prev_val = curr_val;
            }
