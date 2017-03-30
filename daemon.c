@@ -50,6 +50,7 @@ int main(int argc, char *argv[])
 {
         int data_fd;
         
+        
         // Signal handling
         struct sigaction act;
 
@@ -115,19 +116,21 @@ int main(int argc, char *argv[])
         int prev_val = gpio_read(18);
         int curr_val = gpio_read(18);
         
+        char test = 'x';
+        
         /* Daemon Loop */
         while (doneflag) {
            /* Do some task here ... */
            //{"datetime":"", "states":[{"18":"LOW"}]}
            curr_val = gpio_read(18);
            
-           writedata(data_fd, "X");
+           writedata(data_fd, &test);
            
            if(curr_val != prev_val){
                 if(curr_val == 0){
-                    writedata(data_fd, "{\"datetime\":"", \"states\":[{\"18\":\"LO\"}]}");
+                    //writedata(data_fd, "{\"datetime\":"", \"states\":[{\"18\":\"LO\"}]}");
                 }else{
-                    writedata(data_fd, "{\"datetime\":"", \"states\":[{\"18\":\"HI\"}]}");
+                    //writedata(data_fd, "{\"datetime\":"", \"states\":[{\"18\":\"HI\"}]}");
                 }
                 
                 prev_val = curr_val;
