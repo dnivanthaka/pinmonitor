@@ -39,7 +39,7 @@ int opendata(int fp);
 int writedata(int fp, char *data);
 int closedata(int fp);
 
-static void catchsignal(int sig, siginfo_t *siginfo, void *context)
+static void catchsignal(int signo, siginfo_t *siginfo, void *context)
 {
     if ((signo == SIGINT) || (signo == SIGQUIT) || (signo == SIGABRT) || (signo == SIGTERM)) {
         doneflag = 0;
