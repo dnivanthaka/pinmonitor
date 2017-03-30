@@ -128,11 +128,13 @@ int main(int argc, char *argv[])
            //writedata(data_fd, test);
            
            if(curr_val != prev_val){
+                memset(buff, 0, BUFF_SIZE);
+           
                 if(curr_val == 0){
-                    snprintf(buff, BUFF_SIZE, "{\"datetime\":"", \"states\":[{\"18\":\"LO\"}]}");
+                    snprintf(buff, BUFF_SIZE, "{\"datetime\":\"\", \"states\":[{\"18\":\"LO\"}]}\n");
                     //writedata(data_fd, "{\"datetime\":"", \"states\":[{\"18\":\"LO\"}]}");
                 }else{
-                    snprintf(buff, BUFF_SIZE, "{\"datetime\":"", \"states\":[{\"18\":\"HI\"}]}");
+                    snprintf(buff, BUFF_SIZE, "{\"datetime\":\"\", \"states\":[{\"18\":\"HI\"}]}\n");
                     //writedata(data_fd, "{\"datetime\":"", \"states\":[{\"18\":\"HI\"}]}");
                 }
                 
@@ -142,8 +144,8 @@ int main(int argc, char *argv[])
            }
            
            
-           //usleep(3000); /* wait 3 mseconds */
-           sleep(1); /* wait 3 mseconds */
+           usleep(3000); /* wait 3 mseconds */
+           //sleep(1); /* wait 3 mseconds */
         }
         
         //Cleanup
@@ -170,9 +172,9 @@ int closedata(int fp)
 
 int writedata(int fp, char *data)
 {
-    //if(fp > 0){
+    if(fp > 0){
         write(fp, data, strlen(data));
-    //}
+    }
 }
 // GPIO Operations ---------------------------------------------------//
 int setup_gpio(uint8_t pin, uint8_t mode)
