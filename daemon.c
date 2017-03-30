@@ -131,10 +131,10 @@ int main(int argc, char *argv[])
                 //memset(buff, 0, BUFF_SIZE);
            
                 if(curr_val == 0){
-                    snprintf(buff, BUFF_SIZE, "{\"datetime\":\"\", \"states\":[{\"18\":\"LO\"}]}\n");
+                    snprintf(buff, BUFF_SIZE, "{\"datetime\":\"\", \"states\":[{\"PIN\":\"18\", \"VALUE\":\"LO\"}]}\n");
                     //writedata(data_fd, "{\"datetime\":"", \"states\":[{\"18\":\"LO\"}]}");
                 }else{
-                    snprintf(buff, BUFF_SIZE, "{\"datetime\":\"\", \"states\":[{\"18\":\"HI\"}]}\n");
+                    snprintf(buff, BUFF_SIZE, "{\"datetime\":\"\", \"states\":[{\"PIN\":\"18\", \"VALUE\":\"HI\"}]}\n");
                     //writedata(data_fd, "{\"datetime\":"", \"states\":[{\"18\":\"HI\"}]}");
                 }
                 
