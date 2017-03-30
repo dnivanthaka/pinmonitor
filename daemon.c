@@ -120,7 +120,7 @@ int main(int argc, char *argv[])
         char buff[65];
         
         /* Daemon Loop */
-        while (doneflag) {
+        while (1) {
            /* Do some task here ... */
            //{"datetime":"", "states":[{"18":"LOW"}]}
            curr_val = gpio_read(18);
