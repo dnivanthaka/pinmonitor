@@ -117,7 +117,7 @@ int main(int argc, char *argv[])
         int curr_val = gpio_read(18);
         
         char *test = "X\0";
-        //char buff[65];
+        char buff[65];
         
         /* Daemon Loop */
         while (1) {
