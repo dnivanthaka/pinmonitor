@@ -11,6 +11,9 @@
 #include <signal.h>
 #include <string.h>
 
+#include "gpio.h"
+#include "conf.h"
+
 #define BUFF_SIZE 65
 #define SYSLOG_IDEN "PinMonitor"
 #define PID_FILE ""
@@ -18,11 +21,11 @@
 #define GPIO_OUT 0
 #define GPIO_IN  1
 
-typedef struct{
+/*typedef struct{
     uint8_t pin;
     uint8_t mode;
     uint8_t val;
-} gpio_t;
+} gpio_t;*/
 
 static volatile sig_atomic_t doneflag = 1;
 static gpio_t *exported;
@@ -49,6 +52,19 @@ static void catchsignal(int signo, siginfo_t *siginfo, void *context)
 int main(int argc, char *argv[])
 {
         int data_fd;
+        struct gpio_node *list = NULL;
+        struct gpio_node *tmp = NULL;
+
+        FILE *fp = conf_open("test.conf");
+
+        if(fp == NULL){
+            if(ENOENT == errno){
+                printf("No config file present\n");
+                exit(-1);
+            }    
+        }
+        conf_read(fp, &list);
+        conf_close(fp);
         
         
         // Signal handling
@@ -109,14 +125,25 @@ int main(int argc, char *argv[])
         closelog();
         
         /* Daemon-specific initialization goes here */
-        setup_gpio(18, GPIO_IN);
+        //setup_gpio(18, GPIO_IN);
+        tmp = list;
+
+        while(tmp != NULL){
+            setup_gpio(tmp->gpio->pin, GPIO_IN);
+            tmp->gpio->mode = 1;
+            tmp->gpio->val = gpio_read(tmp->gpio->pin);
+
+            tmp = tmp->next; 
+        }
+
         
-        data_fd = open("/tmp/pinmon.txt", O_WRONLY | O_CREAT | O_APPEND);
+        //data_fd = open("/tmp/pinmon.txt", O_WRONLY | O_CREAT | O_TRUNC);
         
-        opendata(data_fd);
+        //opendata(data_fd);
         
-        int prev_val = gpio_read(18);
-        int curr_val = gpio_read(18);
+        //int prev_val = gpio_read(18);
+        //int curr_val = gpio_read(18);
+        int curr_val = 0;
         
         //char *test = "X\0";
         char buff[65];
@@ -125,11 +152,29 @@ int main(int argc, char *argv[])
         while (doneflag) {
            /* Do some task here ... */
            //{"datetime":"", "states":[{"18":"LOW"}]}
-           curr_val = gpio_read(18);
+           tmp = list;
+
+           while(tmp != NULL){
+               curr_val = gpio_read(tmp->gpio->pin);
+                    /*snprintf(buff, BUFF_SIZE, "Checking pin %d, prev_val = %d, new_val= %d\n", tmp->gpio->pin, tmp->gpio->val, curr_val);
+
+                    writedata(data_fd, buff);*/
+               if(curr_val != tmp->gpio->val){
+                    snprintf(buff, BUFF_SIZE, "%s %d", tmp->cmd, curr_val);
+                    system(buff);
+
+                    /*snprintf(buff, BUFF_SIZE, "Script %s, len = %d\n", tmp->cmd, strlen(tmp->cmd));
+
+                    writedata(data_fd, buff);*/
+                    tmp->gpio->val = curr_val;
+               }
+
+               tmp = tmp->next; 
+           }
            
            //writedata(data_fd, test);
            
-           if(curr_val != prev_val){
+           /*if(curr_val != prev_val){
                 //memset(buff, 0, BUFF_SIZE);
            
                 if(curr_val == 0){
@@ -143,16 +188,21 @@ int main(int argc, char *argv[])
                 writedata(data_fd, buff);
                 
                 prev_val = curr_val;
-           }
+           }*/
            
            
-           usleep(300000); /* wait 300 mseconds */
+           usleep(100000); /* wait 100 mseconds */
            //sleep(1); /* wait 3 mseconds */
         }
         
         //Cleanup
-        cleanup_gpio(18);
-        closedata(data_fd);
+        tmp = list;
+        while(tmp != NULL){
+            cleanup_gpio(tmp->gpio->pin);
+            tmp = tmp->next; 
+        }
+        //closedata(data_fd);
+        conf_free(&list);
 
 
     return 0;

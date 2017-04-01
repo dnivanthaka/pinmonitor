@@ -6,35 +6,19 @@
 #include <string.h>
 #include <stdint.h>
 
+#include "gpio.h"
 #include "conf.h"
 
-typedef struct{
-    uint8_t pin;
-    uint8_t mode;
-    uint8_t val;
-} gpio_t;
-
-struct gpio_node{
-    gpio_t *gpio;
-    char *cmd;
-    struct gpio_node *next;
-};
-
-
-struct gpio_node *list;
 
 FILE *conf_open(char *file)
 {
     FILE *fp;
 
     fp = fopen(file, "r");
-
-    list = NULL;
-
     return fp;
 }
 
-int conf_read(FILE *fp)
+int conf_read(FILE *fp, struct gpio_node **list)
 {
     char buff[75];
     int bytes_read = 0;
@@ -58,49 +42,39 @@ int conf_read(FILE *fp)
 
                 len1 = strlen(buff); 
                 len2 = strlen(&buff[len1 + 1]);
+                //buff[len2 - 1] = '\0';
+                //len2 = len2 - 1;
 
                 printf("%s\n", buff);
-                //printf("%s\n", &buff[len1+1]);
+                printf("%s\n", &buff[len1+1]);
+                printf("Len = %d\n", strlen(&buff[len1+1]));
                 gpio_t *gpdata = malloc(sizeof(gpio_t));
                 gpdata->pin = atoi(buff);
                 gpdata->mode = 0;
                 gpdata->val  = 0;
 
+                //struct gpio_node *tmp;
+                //tmp = *list;
 
-                    if(list == NULL){
-                        list = (struct gpio_node *)malloc(sizeof(struct gpio_node));
-                        char *str = malloc(strlen(&buff[len1 + 1]));
+                if((*list) != NULL){
+                    list = &((*list)->next);
+                    
+                }
 
-                        memcpy(str, &buff[len1 + 1], len2);
+                (*list) = (struct gpio_node *)malloc(sizeof(struct gpio_node));
+                //strlen returns the length of the string without the null terminator
+                char *str = malloc(len2 + 1);
 
-                        list->gpio = gpdata;
-                        list->cmd  = str;
-                        list->next = NULL;
-                    }else{
-                        struct gpio_node *tmp;
-                        tmp = list;
-                        //Goto last node
-                        while(tmp->next != NULL){
-                            tmp = tmp->next; 
-                        }
+                memcpy(str, &buff[len1 + 1], len2 + 1);
 
-                        tmp->next = (struct gpio_node *)malloc(sizeof(struct gpio_node));
-                        tmp = tmp->next;
-                        char *str = malloc(strlen(&buff[len1 + 1]));
-
-                        memcpy(str, &buff[len1 + 1], len2);
-
-                        tmp->gpio = gpdata;
-                        tmp->cmd  = str;
-                        tmp->next = NULL;
-                    }
-
-
+                (*list)->gpio = gpdata;
+                (*list)->cmd  = str;
+                (*list)->next = NULL;
+                printf("Copy = %s\n", str);
 
             } 
         }
     }
-
 }
 
 int conf_close(FILE *fp)
@@ -110,21 +84,51 @@ int conf_close(FILE *fp)
     //}
 }
 
-int main(void){
+int conf_free(struct gpio_node **list)
+{
+    struct gpio_node *tmp;
+
+    while((*list) != NULL){
+        tmp = *list;
+        list = &((*list)->next);
+        free(tmp);
+    }
+}
+
+/*void test_mem(struct gpio_node **list){
+    
+    (*list) = (struct gpio_node *)malloc(sizeof(struct gpio_node));
+    (*list)->next = NULL;
+}*/
+//Added for testing purposes
+/*int main(void){
+    struct gpio_node *list = NULL;
+
     FILE *fp = conf_open("test.conf");
-    conf_read(fp);
+
+    if(fp == NULL){
+        if(ENOENT == errno){
+            printf("No config file present\n");
+            exit(EXIT_SUCCESS);
+        }    
+    }
+    conf_read(fp, &list);
     conf_close(fp);
+
+    //test_mem(&list);
 
     struct gpio_node *tmp;
 
-    tmp = list;
+    //tmp = list;
 
     //printf("%d\n", list);
 
-    while(tmp != NULL){
-        printf("Pin = %d\n", tmp->gpio->pin);
-        tmp = tmp->next; 
+    while(list != NULL){
+        printf("Pin = %d\n", list->gpio->pin);
+        list = list->next; 
     }
 
+    conf_free(&list);
+
     return 0;
-}
+}*/
