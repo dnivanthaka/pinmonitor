@@ -6,7 +6,7 @@ Pin status monitoring service/daemon for Raspberry pi.
 - Must be run as sudo
 
 ### Builiding/Compiling and Running
-- Clone this repository and issue make
+- Clone this repository and issue "make"
 - Run as "sudo ./pinmon"
 
 ### Stopping the service [For now]
