@@ -9,8 +9,6 @@
 #include "gpio.h"
 #include "conf.h"
 
-#define CONF_FILE_NAME "pinmon.conf"
-
 
 FILE *conf_open(char *file)
 {
