@@ -16,6 +16,7 @@
 
 #define BUFF_SIZE 65
 #define SYSLOG_IDEN "PinMonitor"
+#define CONF_FILE_NAME "pinmon.conf"
 #define PID_FILE ""
 
 #define GPIO_OUT 0
@@ -55,11 +56,11 @@ int main(int argc, char *argv[])
         struct gpio_node *list = NULL;
         struct gpio_node *tmp = NULL;
 
-        FILE *fp = conf_open("test.conf");
+        FILE *fp = conf_open(CONF_FILE_NAME);
 
         if(fp == NULL){
             if(ENOENT == errno){
-                printf("No config file present\n");
+                printf("No config file %s present\n", CONF_FILE_NAME);
                 exit(-1);
             }    
         }
