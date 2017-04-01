@@ -12,3 +12,6 @@ Pin status monitoring service/daemon for Raspberry pi.
 ### Stopping the service [For now]
 - find the process id of the pinmon service by executing "ps aux | grep pinmon"
 and kill it by issuing "sudo kill [process id]"
+
+#### TODO
+- Improve the performance by using memory mapped IO
